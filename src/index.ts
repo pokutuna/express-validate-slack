@@ -5,7 +5,7 @@ import { Request, Response, NextFunction, RequestHandler } from "express";
 
 function isInFiveMinutes(timestamp: string, now: Date): boolean {
   const epoch = parseInt(timestamp, 10);
-  return epoch < Math.floor(now.getTime() / 1000) - 60 * 5;
+  return Math.floor(now.getTime() / 1000) - 60 * 5 <= epoch;
 }
 
 interface WithRawBody extends Request {

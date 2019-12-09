@@ -7,7 +7,7 @@ var http_errors_1 = __importDefault(require("http-errors"));
 var crypto_1 = __importDefault(require("crypto"));
 function isInFiveMinutes(timestamp, now) {
     var epoch = parseInt(timestamp, 10);
-    return epoch < Math.floor(now.getTime() / 1000) - 60 * 5;
+    return Math.floor(now.getTime() / 1000) - 60 * 5 <= epoch;
 }
 function hasRawBody(req) {
     return req.rawBody ? true : false;
