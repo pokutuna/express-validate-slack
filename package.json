@@ -1,6 +1,6 @@
 {
   "name": "express-validate-slack",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "a middleware to verify requests from slack for Express.js",
   "main": "index.js",
   "scripts": {

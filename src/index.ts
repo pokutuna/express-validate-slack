@@ -23,11 +23,24 @@ export default function verifySlack(signingSecret: string): RequestHandler {
   return (req: Request, res: Response, next: NextFunction) => {
     const timestamp = req.header("X-Slack-Request-Timestamp");
     const signature = req.header("X-Slack-Signature");
+
     if (!timestamp || !signature) {
-      return next(createError(400, "Not containing X-Slack- headers"));
+      return next(
+        createError(400, "Not containing X-Slack- headers", {
+          timestamp,
+          signature
+        })
+      );
     }
-    if (!isInFiveMinutes(timestamp, new Date())) {
-      return next(createError(400, "Outdated Slack request"));
+
+    const now = new Date();
+    if (!isInFiveMinutes(timestamp, now)) {
+      return next(
+        createError(400, "Outdated Slack request", {
+          timestamp,
+          now
+        })
+      );
     }
 
     const body = hasRawBody(req) ? req.rawBody : req.body;
@@ -35,11 +48,11 @@ export default function verifySlack(signingSecret: string): RequestHandler {
     const [version, hash] = signature.split("=");
     hmac.update(`${version}:${timestamp}:${body}`);
 
-    const equal = crypto.timingSafeEqual(
+    const valid = crypto.timingSafeEqual(
       Buffer.from(hash || ""),
       Buffer.from(hmac.digest("hex"))
     );
-    if (!equal) {
+    if (!valid) {
       return next(createError(400, "X-Slack-Signature verification failed"));
     }
 
