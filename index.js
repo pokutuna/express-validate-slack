@@ -35,4 +35,4 @@ function verifySlack(signingSecret) {
         next();
     };
 }
-exports.verifySlack = verifySlack;
+exports.default = verifySlack;

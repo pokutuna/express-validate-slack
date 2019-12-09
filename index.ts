@@ -16,7 +16,7 @@ function hasRawBody(req: Request): req is WithRawBody {
   return (req as any).rawBody ? true : false;
 }
 
-export function verifySlack(signingSecret: string): RequestHandler {
+export default function verifySlack(signingSecret: string): RequestHandler {
   if (!signingSecret)
     throw new Error("set signing secret to verify requests from Slack");
 
