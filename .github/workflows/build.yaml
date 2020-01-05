@@ -13,11 +13,9 @@ jobs:
       - run: npm install
       - run: npm run build
       - run: |
-        FILES=`git status --porcelain -- lib | wc -l`
-        if [ $FILES -eq 0 ]; then
-          exit 0
-        fi
+        FILES=$(git status --porcelain -- lib | wc -l)
+        [ $FILES -eq 0 ] && exit 0
       - run: echo "can you show this?"
       - run: |
-        git config --local user.name `git log -n1 --format="%an"`
-        git config --local user.email `git log -n1 --format="%ae"`
+        git config --local user.name $(git log -n1 --format="%an")
+        git config --local user.email $(git log -n1 --format="%ae")
