@@ -2,7 +2,11 @@
   "name": "express-validate-slack",
   "version": "1.0.1",
   "description": "a middleware to verify requests from slack for Express.js",
-  "main": "index.js",
+  "main": "lib/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pokutuna/express-validate-slack.git"
+  },
   "scripts": {
     "build": "tsc --project .",
     "test": "jest"

@@ -1,0 +1,31 @@
+name: build
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+      - run: npm install
+      - run: npm run build
+      - name: check updated files
+        id: files
+        run: |
+          FILES=$(git status --porcelain -- lib | wc -l)
+          echo ::set-output name=updated::${FILES}
+      - name: bump version & commit updated files
+        if: steps.files.outputs.updated != 0
+        run: |
+          git config --local user.name $(git log -n1 --format="%an")
+          git config --local user.email $(git log -n1 --format="%ae")
+          git commit -a -m "build"
+          npm version patch
+      - name: push
+        if: steps.files.outputs.updated != 0
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
