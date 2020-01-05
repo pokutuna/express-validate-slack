@@ -15,8 +15,11 @@ jobs:
       - run: npm run build
       - run: |
           FILES=$(git status --porcelain -- lib | wc -l)
-          [ $FILES -eq 0 ] && exit 1
+          echo ::set-output name=updated::${FILES}
+        id: files
       - run: echo "can you show this?"
+        if: steps.files.outputs.updated != 0
       - run: |
           git config --local user.name $(git log -n1 --format="%an")
           git config --local user.email $(git log -n1 --format="%ae")
+        if: steps.files.outputs.updated == 0
