@@ -1,8 +1,9 @@
 name: build
 on:
   push:
-    - master
-    - build-on-actions
+    branches:
+      - master
+      - build-on-actions
 
 jobs:
   build:
