@@ -38,5 +38,5 @@ app.post(
 
 It doesn't need to keep `req.rawBody` on Google Cloud Functions.
 
-> The rawBody property contains the unparsed bytes of the request body.
-[HTTP Functions  |  Cloud Functions Documentation  |  Google Cloud](https://cloud.google.com/functions/docs/writing/http?hl=en#handling_content_types)
+> The rawBody property contains the unparsed bytes of the request body.  
+> [HTTP Functions  |  Cloud Functions Documentation  |  Google Cloud](https://cloud.google.com/functions/docs/writing/http?hl=en#handling_content_types)
