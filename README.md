@@ -13,19 +13,17 @@ Based on [Verifying requests from Slack | Slack](https://api.slack.com/docs/veri
 
 ```js
 import express from "express";
-import verifySlack from "express-validate-slack";
+import verifySlack, { rawBodyKeeper } from "express-validate-slack";
 
 const app = express();
 
 // 1. To keep original request body as `req.rawBody`.
-// Verifying requests from Slack requires original message body,
-// but almost all middlewares overwrite `req.body`.
+// Almost all middlewares & frameworks replace `req.body`.
+// Verifying requests from Slack requires original body.
 //
 // This middleware first checks req.rawBody,
 // and use req.body if rawBody doesn't exist.
-app.use(express.json({
-  verify: (req, res, buf) => req.rawBody = buf
-}));
+app.use(express.json({ verify: rawBodyKeeper }));
 
 
 // 2. Enable this middleware
@@ -44,9 +42,56 @@ app.post(
 
 ### Appendix
 
+#### Cloud Functions
+
 This package is designed for Google Cloud Functions.
 
-You don't need to keep `req.rawBody`(Step 1 in Usage) on it.
+You don't need to keep `req.rawBody`(Step 1 in Usage) when receiving reqeusts on Cloud Functions.
 
-> The rawBody property contains the unparsed bytes of the request body.  
+> The rawBody property contains the unparsed bytes of the request body.
 > [HTTP Functions  |  Cloud Functions Documentation  |  Google Cloud](https://cloud.google.com/functions/docs/writing/http?hl=en#handling_content_types)
+
+
+#### Next.js
+
+To use this with Next.js in API Routes, do the following.
+
+[API Routes: API Middlewares | Next.js](https://nextjs.org/docs/api-routes/api-middlewares)
+
+In `pages/api/slack.ts`
+
+```ts
+import type { NextApiRequest, NextApiResponse } from "next";
+import type express from "express";
+import bodyParser from "body-parser";
+import validateSlack, { rawBodyKeeper } from "@pokutuna/express-validate-slack";
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
+// runMiddleware from Next.js document
+// https://nextjs.org/docs/api-routes/api-middlewares#connectexpress-middleware-support
+function runMiddleware(req: NextApiRequest, res: NextApiResponse, fn: express.RequestHandler) {
+  return new Promise((resolve, reject) => {
+    fn(req, res, (result) => {
+      if (result instanceof Error) {
+        return reject(result);
+      }
+      return resolve(result);
+    });
+  });
+}
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  await runMiddleware(req, res, bodyParser.json({ verify: rawBodyKeeper }));
+  await runMiddleware(req, res, validateSlack("<SLACK_SIGNING_SECRET>"));
+
+  // access parsed body
+  console.log(req.body.type);
+
+  res.status(200).json({/* ... */});
+}
+```
