@@ -1,5 +1,5 @@
 {
-  "name": "express-validate-slack",
+  "name": "@pokutuna/express-validate-slack",
   "version": "1.0.3",
   "description": "a express middleware to verify requests from slack",
   "repository": {
@@ -9,6 +9,9 @@
   "license": "ISC",
   "author": "pokutuna",
   "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
   "scripts": {
     "build": "tsc --project .",
     "test": "jest"
@@ -32,5 +35,8 @@
   },
   "engines": {
     "node": ">=12"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
