@@ -2,6 +2,9 @@
 name: release
 on:
   push:
+    branches:
+      - master
+      - main
     tags:
       - "v[0-9]+.[0-9]+.[0-9]+*"
 jobs:
@@ -15,7 +18,8 @@ jobs:
           registry-url: https://registry.npmjs.org
           scope: "@pokutuna"
       - run: npx can-npm-publish --verbose
-      - run: npm install
+      - run: npm ci
+      - run: npm run test
       - run: npm run build
       - run: npm publish
         env:
