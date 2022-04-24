@@ -1,17 +1,26 @@
 import createError from "http-errors";
 import crypto from "crypto";
-import { Request, Response, NextFunction, RequestHandler } from "express";
+import type { IncomingMessage, ServerResponse } from "http";
+import type { NextFunction } from "express";
+
+interface IncomingMessageWithBody extends IncomingMessage {
+  body: any;
+}
+
+interface IncomingMessageWithRawBody extends IncomingMessageWithBody {
+  rawBody: Buffer;
+}
+
+interface GenericRequestHandler {
+  (req: IncomingMessageWithBody, res: ServerResponse, next: NextFunction): void;
+}
 
 function isIn5Minutes(timestamp: string, now: Date): boolean {
   const epoch = parseInt(timestamp, 10);
   return Math.floor(now.getTime() / 1000) - 60 * 5 <= epoch;
 }
 
-interface WithRawBody extends Request {
-  rawBody: Buffer;
-}
-
-function hasRawBody(req: Request): req is WithRawBody {
+function hasRawBody(req: IncomingMessage): req is IncomingMessageWithRawBody {
   return (req as any).rawBody ? true : false;
 }
 
@@ -21,8 +30,12 @@ function hasRawBody(req: Request): req is WithRawBody {
  * Usage.
  *   app.use(bodyParser.json({ verify: rawBodyKeeper }))
  */
-export function rawBodyKeeper(req: Request, res: Response, buf: Buffer) {
-  (req as WithRawBody).rawBody = buf;
+export function rawBodyKeeper(
+  req: IncomingMessage,
+  res: ServerResponse,
+  buf: Buffer
+) {
+  (req as IncomingMessageWithRawBody).rawBody = buf;
 }
 
 /**
@@ -63,11 +76,17 @@ function head(input: string[] | string | undefined): string | undefined {
  * Returns a middleware that validates requests from Slack
  * This expects req.rawBody to be a Buffer having original request body.
  */
-export default function verifySlack(signingSecret: string): RequestHandler {
+export default function verifySlack(
+  signingSecret: string
+): GenericRequestHandler {
   if (!signingSecret)
     throw new Error("set signing secret to verify requests from Slack");
 
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (
+    req: IncomingMessageWithBody,
+    res: ServerResponse,
+    next: NextFunction
+  ) => {
     const timestamp = head(req.headers["x-slack-request-timestamp"]);
     const signature = head(req.headers["x-slack-signature"]);
 
