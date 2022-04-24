@@ -1,6 +1,6 @@
 import createError from "http-errors";
 import crypto from "crypto";
-
+import http from "http";
 import { Request, Response, NextFunction, RequestHandler } from "express";
 
 function isIn5Minutes(timestamp: string, now: Date): boolean {
@@ -40,19 +40,29 @@ function _verifyMessage(
   }
 }
 
+function head(input: string[] | string | undefined): string | undefined {
+  if (typeof input === "string") {
+    return input;
+  }
+  if (Array.isArray(input) && input.length > 0) {
+    return input[0];
+  }
+  return undefined;
+}
+
 export default function verifySlack(signingSecret: string): RequestHandler {
   if (!signingSecret)
     throw new Error("set signing secret to verify requests from Slack");
 
   return (req: Request, res: Response, next: NextFunction) => {
-    const timestamp = req.header("X-Slack-Request-Timestamp");
-    const signature = req.header("X-Slack-Signature");
+    const timestamp = head(req.headers["x-slack-request-timestamp"]);
+    const signature = head(req.headers["x-slack-signature"]);
 
     if (!timestamp || !signature) {
       return next(
         createError(400, "Not containing X-Slack headers", {
           timestamp,
-          signature
+          signature,
         })
       );
     }
@@ -62,7 +72,7 @@ export default function verifySlack(signingSecret: string): RequestHandler {
       return next(
         createError(400, "Outdated Slack request", {
           timestamp,
-          now
+          now,
         })
       );
     }
