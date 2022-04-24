@@ -7,7 +7,7 @@
     "url": "git+https://github.com/pokutuna/express-validate-slack.git"
   },
   "license": "ISC",
-  "author": "pokutuna",
+  "author": "pokutuna <mail@pokutuna.com>",
   "main": "lib/index.js",
   "files": [
     "lib"
