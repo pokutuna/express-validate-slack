@@ -1,9 +1,13 @@
-express-validate-slack
+@pokutuna/express-validate-slack
 ===
 
-A middleware to verify requests from Slack working on [Express](https://github.com/expressjs/express).
+[![Actions Status](https://github.com/pokutuna/express-validate-slack/workflows/test/badge.svg?branch=master)](https://github.com/pokutuna/express-validate-slack/actions) [![npm (scoped)](https://img.shields.io/npm/v/@pokutuna/express-validate-slack)](https://www.npmjs.com/package/@pokutuna/express-validate-slack)
 
-[Verifying requests from Slack | Slack](https://api.slack.com/docs/verifying-requests-from-slack)
+
+A [express](https://github.com/expressjs/express) middleware to verify requests from Slack.
+
+Based on [Verifying requests from Slack | Slack](https://api.slack.com/docs/verifying-requests-from-slack)
+
 
 ## Usage
 
@@ -14,8 +18,11 @@ import verifySlack from "express-validate-slack";
 const app = express();
 
 // 1. To keep original request body as `req.rawBody`.
-// Verifying requests from Slack requires original message, 
-// but almost all middlewares parsing body overwrite `req.body`.
+// Verifying requests from Slack requires original message body,
+// but almost all middlewares overwrite `req.body`.
+//
+// This middleware first checks req.rawBody,
+// and use req.body if rawBody doesn't exist.
 app.use(express.json({
   verify: (req, res, buf) => req.rawBody = buf
 }));
@@ -23,6 +30,7 @@ app.use(express.json({
 
 // 2. Enable this middleware
 app.use(verifySlack("<SLACK_SIGNING_SECRET>"));
+
 // or enable this at a mount point.
 // see https://expressjs.com/en/guide/using-middleware.html
 app.post(
@@ -36,7 +44,9 @@ app.post(
 
 ### Appendix
 
-It doesn't need to keep `req.rawBody` on Google Cloud Functions.
+This package is designed for Google Cloud Functions.
+
+You don't need to keep `req.rawBody`(Step 1 in Usage) on it.
 
 > The rawBody property contains the unparsed bytes of the request body.  
 > [HTTP Functions  |  Cloud Functions Documentation  |  Google Cloud](https://cloud.google.com/functions/docs/writing/http?hl=en#handling_content_types)
