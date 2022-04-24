@@ -48,7 +48,7 @@ This package is designed for Google Cloud Functions.
 
 You don't need to keep `req.rawBody`(Step 1 in Usage) when receiving reqeusts on Cloud Functions.
 
-> The rawBody property contains the unparsed bytes of the request body.
+> The rawBody property contains the unparsed bytes of the request body.  
 > [HTTP Functions  |  Cloud Functions Documentation  |  Google Cloud](https://cloud.google.com/functions/docs/writing/http?hl=en#handling_content_types)
 
 
