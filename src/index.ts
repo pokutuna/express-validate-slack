@@ -1,6 +1,5 @@
 import createError from "http-errors";
 import crypto from "crypto";
-import http from "http";
 import { Request, Response, NextFunction, RequestHandler } from "express";
 
 function isIn5Minutes(timestamp: string, now: Date): boolean {
@@ -16,11 +15,21 @@ function hasRawBody(req: Request): req is WithRawBody {
   return (req as any).rawBody ? true : false;
 }
 
+/**
+ * Keep original body to req.RawBody for bodyParser.json()
+ * You don't need call this function directly, pass it to bodyParser.json().
+ * Usage.
+ *   app.use(bodyParser.json({ verify: rawBodyKeeper }))
+ */
 export function rawBodyKeeper(req: Request, res: Response, buf: Buffer) {
   (req as WithRawBody).rawBody = buf;
 }
 
-function _verifyMessage(
+/**
+ * Verify request body from slack manually
+ * see {@link https://api.slack.com/authentication/verifying-requests-from-slack}
+ */
+export function verifyMessage(
   signingSecret: string,
   requestSignature: string,
   timestamp: string,
@@ -50,6 +59,10 @@ function head(input: string[] | string | undefined): string | undefined {
   return undefined;
 }
 
+/**
+ * Returns a middleware that validates requests from Slack
+ * This expects req.rawBody to be a Buffer having original request body.
+ */
 export default function verifySlack(signingSecret: string): RequestHandler {
   if (!signingSecret)
     throw new Error("set signing secret to verify requests from Slack");
@@ -82,7 +95,7 @@ export default function verifySlack(signingSecret: string): RequestHandler {
       return next(createError(500, "Message must be a Buffer"));
     }
 
-    const valid = _verifyMessage(signingSecret, signature, timestamp, body);
+    const valid = verifyMessage(signingSecret, signature, timestamp, body);
     if (!valid) {
       return next(createError(400, "X-Slack-Signature verification failed"));
     }
