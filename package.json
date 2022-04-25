@@ -1,6 +1,6 @@
 {
   "name": "@pokutuna/express-validate-slack",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "a express middleware to verify requests from slack",
   "homepage": "https://github.com/pokutuna/express-validate-slack#readme",
   "bugs": {
