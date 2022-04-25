@@ -29,7 +29,7 @@ app.use(express.json({ verify: rawBodyKeeper }));
 // 2. Enable this middleware
 app.use(verifySlack("<SLACK_SIGNING_SECRET>"));
 
-// or enable this at a mount point.
+// or enable middleware for a route.
 // see https://expressjs.com/en/guide/using-middleware.html
 app.post(
   "/slack/slash-command",
@@ -86,11 +86,17 @@ function runMiddleware(req: NextApiRequest, res: NextApiResponse, fn: express.Re
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  // Run middlewares
   await runMiddleware(req, res, bodyParser.json({ verify: rawBodyKeeper }));
   await runMiddleware(req, res, validateSlack("<SLACK_SIGNING_SECRET>"));
 
-  // access parsed body
-  console.log(req.body.type);
+  // Rest of API logic
+
+  // e.g. URL Verification https://api.slack.com/events/url_verification
+  if (req.body.type === "url_verification") {
+    const { challenge } = req.body;
+    return res.status(200).json({ challenge });
+  }
 
   res.status(200).json({/* ... */});
 }
